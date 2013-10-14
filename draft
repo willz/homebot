@@ -1,0 +1,11 @@
+puton(A,B) at(A,B) -plate(A) -hold(A)
+putdown(A) -plate(A) -hold(A)
+pickup(A) plate(A) || hold(A)
+putin(A,B) inside(A,B) -plate(A) -hold(A)
+takeout(A,B) -inside(A,B)
+
+puton pickup   A !=
+puton putin    if !equal(B) A!=
+putdown pickup A !=
+pickup putin    A !=
+putin takeout  A != or B !=

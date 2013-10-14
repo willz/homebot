@@ -1,0 +1,5 @@
+根据初始状态可直接看出最终状态，例如没有物体1的位置，那么对物体1将执行不了任何操作，最终状态肯定不会出现物体1
+通过分析TASK，来确定需要知道什么物体的位置。
+例如pickup(can)和puton(can, x)是不兼容的，即can不能是同个物体，必须知道2个及以上can的位置
+再如putdown(can)和puton(can,x)则是兼容的。
+pickup(green can), putdown(can)
