@@ -29,6 +29,12 @@ struct TaskPred {
     string param2;
 };
 
+struct InfoPred {
+    InfoType type;
+    string param1;
+    string param2;
+};
+
 %}
 
 
@@ -40,6 +46,9 @@ struct TaskPred {
     CondDef* pCondDef;
     vector<CondDef>* pVecCondDef;
     TaskPred* pTaskPred;
+    InfoPred* pInfoPred;
+    Task* pTask;
+    Info* pInfo;
 }
 
 %type <number> NUMBER
@@ -48,6 +57,11 @@ struct TaskPred {
 %type <pVecCondDef> condition_star
 %type <pVecCondDef> condition_def
 %type <pTaskPred> task_predicate
+%type <pInfoPred> info_predicate
+%type <pTask> task_combine
+%type <pTask> task_definition
+%type <pInfo> info_combine
+%type <pInfo> info_definition
 
 %token OPEN_PAREN
 %token CLOSE_PAREN
@@ -175,19 +189,23 @@ OPEN_PAREN INS_TOK ins_body_star CLOSE_PAREN {
 
 ins_body_star:
 /* empty */
-ins_body {
-    cout << "ins_body" << endl;
-}
-|
 ins_body ins_body_star {
     cout << "ins_body_star" << endl;
+}
+|
+ins_body {
+    cout << "ins_body" << endl;
 }
 ;
 
 ins_body:
-info_definition
+info_definition {
+    cout << "ins info" << endl;
+}
 |
-task_definition
+task_definition {
+    cout << "ins task" << endl;
+}
 |
 cons_not_definition
 |
@@ -195,69 +213,72 @@ cons_notnot_definition
 ;
 
 info_definition:
-OPEN_PAREN INFO_TOK info_predicate condition_def CLOSE_PAREN
+OPEN_PAREN INFO_TOK info_combine CLOSE_PAREN {
+    cout << "info here " << endl;
+}
 ;
 
 info_predicate:
 OPEN_PAREN ON_TOK WORD WORD CLOSE_PAREN {
+    cout << "on " << endl;
+    $$ = new InfoPred();
+    $$->type = I_ON;
+    $$->param1 = $3;
+    $$->param2 = $4;
 }
 |
 OPEN_PAREN PLATE_TOK WORD CLOSE_PAREN {
+    $$ = new InfoPred();
+    $$->type = I_PLATE;
+    $$->param1 = $3;
 }
 |
 OPEN_PAREN NEAR_TOK WORD WORD CLOSE_PAREN {
+    $$ = new InfoPred();
+    $$->type = I_NEAR;
+    $$->param1 = $3;
+    $$->param2 = $4;
 }
 |
 OPEN_PAREN INSIDE_TOK WORD WORD CLOSE_PAREN {
+    cout << "inside" << endl;
+    $$ = new InfoPred();
+    $$->type = I_INSIDE;
+    $$->param1 = $3;
+    $$->param2 = $4;
 }
 |
 OPEN_PAREN OPENED_TOK WORD CLOSE_PAREN {
+    $$ = new InfoPred();
+    $$->type = I_OPENED;
+    $$->param1 = $3;
 }
 |
 OPEN_PAREN CLOSED_TOK WORD CLOSE_PAREN {
+    $$ = new InfoPred();
+    $$->type = I_CLOSED;
+    $$->param1 = $3;
 }
 ;
 
 task_definition:
-OPEN_PAREN TASK_TOK task_predicate condition_def CLOSE_PAREN {
-    Task t;
-    t.type = $3->type;
-    for (size_t i = 0; i < $4->size(); ++i) {
-        CondDef cond = (*$4)[i];
-        if (cond.var == $3->param1) {
-            if (cond.pred == "sort") {
-                t.arg1.sort = SortStrToEnum(cond.param.c_str());
-            } else if (cond.pred == "color") {
-                t.arg1.color = ColorStrToEnum(cond.param.c_str());
-            } else {
-                t.arg1.isContainer = true;
-            }
-        }
-        else {
-            if (cond.pred == "sort") {
-                t.arg2.sort = SortStrToEnum(cond.param.c_str());
-            } else if (cond.pred == "color") {
-                t.arg2.color = ColorStrToEnum(cond.param.c_str());
-            } else {
-                t.arg2.isContainer = true;
-            }
-        }
-    }
-    tasks.push_back(t);
+OPEN_PAREN TASK_TOK task_combine CLOSE_PAREN {
+    tasks.push_back(*$3);
     cout << tasks.size() << endl;
     delete $3;
-    delete $4;
 }
 ;
 
 task_predicate:
 OPEN_PAREN WORD WORD CLOSE_PAREN {
+    cout << $2 << endl;
     $$ = new TaskPred();
     $$->type = TaskStrToEnum($2);
     $$->param1 = $3;
 }
 |
 OPEN_PAREN WORD WORD WORD CLOSE_PAREN {
+    cout << $2 << endl;
     $$ = new TaskPred();
     $$->type = TaskStrToEnum($2);
     $$->param1 = $3;
@@ -265,20 +286,102 @@ OPEN_PAREN WORD WORD WORD CLOSE_PAREN {
 }
 ;
 
+task_combine:
+task_predicate condition_def {
+    $$ = new Task();
+    $$->type = $1->type;
+    for (size_t i = 0; i < $2->size(); ++i) {
+        CondDef cond = (*$2)[i];
+        if (cond.var == $1->param1) {
+            if (cond.pred == "sort") {
+                $$->arg1.sort = SortStrToEnum(cond.param.c_str());
+            } else if (cond.pred == "color") {
+                $$->arg1.color = ColorStrToEnum(cond.param.c_str());
+            } else {
+                $$->arg1.isContainer = true;
+            }
+        }
+        else {
+            if (cond.pred == "sort") {
+                $$->arg2.sort = SortStrToEnum(cond.param.c_str());
+            } else if (cond.pred == "color") {
+                $$->arg2.color = ColorStrToEnum(cond.param.c_str());
+            } else {
+                $$->arg2.isContainer = true;
+            }
+        }
+    }
+    delete $1;
+    delete $2;
+}
+;
+
+info_combine:
+info_predicate condition_def {
+    $$ = new Info();
+    $$->type = $1->type;
+    for (size_t i = 0; i < $2->size(); ++i) {
+        CondDef cond = (*$2)[i];
+        if (cond.var == $1->param1) {
+            if (cond.pred == "sort") {
+                $$->arg1.sort = SortStrToEnum(cond.param.c_str());
+            } else if (cond.pred == "color") {
+                $$->arg1.color = ColorStrToEnum(cond.param.c_str());
+            } else {
+                $$->arg1.isContainer = true;
+            }
+        }
+        else {
+            if (cond.pred == "sort") {
+                $$->arg2.sort = SortStrToEnum(cond.param.c_str());
+            } else if (cond.pred == "color") {
+                $$->arg2.color = ColorStrToEnum(cond.param.c_str());
+            } else {
+                $$->arg2.isContainer = true;
+            }
+        }
+    }
+    delete $1;
+    delete $2;
+}
+;
+
 cons_not_definition:
-OPEN_PAREN CONS_NOT_TOK task_predicate condition_def CLOSE_PAREN
+OPEN_PAREN CONS_NOT_TOK task_combine CLOSE_PAREN {
+    ConsTask cons;
+    cons.type = CONS_NOT;
+    cons.task = *$3;
+    delete $3;
+}
 |
-OPEN_PAREN CONS_NOT_TOK info_predicate condition_def CLOSE_PAREN
+OPEN_PAREN CONS_NOT_TOK info_combine CLOSE_PAREN {
+    ConsInfo cons;
+    cons.type = CONS_NOT;
+    cons.info = *$3;
+    delete $3;
+}
 ;
 
 cons_notnot_definition:
-OPEN_PAREN CONS_NOTNOT_TOK task_predicate condition_def CLOSE_PAREN
+OPEN_PAREN CONS_NOTNOT_TOK task_definition CLOSE_PAREN {
+    ConsTask cons;
+    cons.type = CONS_NOTNOT;
+    cons.task = *$3;
+    delete $3;
+}
 |
-OPEN_PAREN CONS_NOTNOT_TOK info_predicate condition_def CLOSE_PAREN
+OPEN_PAREN CONS_NOTNOT_TOK info_definition CLOSE_PAREN {
+    cout << " cons not not " << endl;
+    ConsInfo cons;
+    cons.type = CONS_NOTNOT;
+    cons.info = *$3;
+    delete $3;
+}
 ;
 
 condition_def:
 OPEN_PAREN COND_TOK condition_star CLOSE_PAREN {
+    cout << "cond def" << endl;
     $$ = $3;
 }
 ;

@@ -28,6 +28,8 @@ enum ACTION {MOVE, PICKUP, PUTDOWN, TOPLATE, FROMPLATE, OPEN, CLOSE,
 enum TaskType {T_GIVE, T_PUTON, T_GOTO, T_PUTDOWN, T_PICKUP, T_OPEN,
                T_PUTIN, T_CLOSE, T_TAKEOUT};
 
+enum ConsType {CONS_NOT, CONS_NOTNOT};
+
 ColorType ColorStrToEnum(const char* str);
 SortType SortStrToEnum(const char* str);
 SizeType SizeStrToEnum(const char* str);
@@ -53,6 +55,25 @@ public:
     TaskType type;
     Object arg1;
     Object arg2;
+};
+
+class Info {
+public:
+    InfoType type;
+    Object arg1;
+    Object arg2;
+};
+
+class ConsTask {
+public:
+    ConsType type;
+    Task task;
+};
+
+class ConsInfo {
+public:
+    ConsType type;
+    Info info;
 };
 
 class Domain {
