@@ -9,6 +9,9 @@ using namespace std;
 
 static map<unsigned, Object> objects;
 static vector<Task> tasks;
+static vector<Info> infos;
+static vector<ConsTask> consTasks;
+static vector<ConsInfo> consInfos;
 static unsigned plate = 0;
 static unsigned hold = 0;
 
@@ -214,13 +217,13 @@ cons_notnot_definition
 
 info_definition:
 OPEN_PAREN INFO_TOK info_combine CLOSE_PAREN {
-    cout << "info here " << endl;
+    infos.push_back(*$3);
+    delete $3;
 }
 ;
 
 info_predicate:
 OPEN_PAREN ON_TOK WORD WORD CLOSE_PAREN {
-    cout << "on " << endl;
     $$ = new InfoPred();
     $$->type = I_ON;
     $$->param1 = $3;
@@ -241,7 +244,6 @@ OPEN_PAREN NEAR_TOK WORD WORD CLOSE_PAREN {
 }
 |
 OPEN_PAREN INSIDE_TOK WORD WORD CLOSE_PAREN {
-    cout << "inside" << endl;
     $$ = new InfoPred();
     $$->type = I_INSIDE;
     $$->param1 = $3;
@@ -264,7 +266,6 @@ OPEN_PAREN CLOSED_TOK WORD CLOSE_PAREN {
 task_definition:
 OPEN_PAREN TASK_TOK task_combine CLOSE_PAREN {
     tasks.push_back(*$3);
-    cout << tasks.size() << endl;
     delete $3;
 }
 ;
@@ -347,17 +348,19 @@ info_predicate condition_def {
 ;
 
 cons_not_definition:
-OPEN_PAREN CONS_NOT_TOK task_combine CLOSE_PAREN {
+OPEN_PAREN CONS_NOT_TOK task_definition CLOSE_PAREN {
     ConsTask cons;
     cons.type = CONS_NOT;
     cons.task = *$3;
+    consTasks.push_back(cons);
     delete $3;
 }
 |
-OPEN_PAREN CONS_NOT_TOK info_combine CLOSE_PAREN {
+OPEN_PAREN CONS_NOT_TOK info_definition CLOSE_PAREN {
     ConsInfo cons;
     cons.type = CONS_NOT;
     cons.info = *$3;
+    consInfos.push_back(cons);
     delete $3;
 }
 ;
@@ -367,6 +370,7 @@ OPEN_PAREN CONS_NOTNOT_TOK task_definition CLOSE_PAREN {
     ConsTask cons;
     cons.type = CONS_NOTNOT;
     cons.task = *$3;
+    consTasks.push_back(cons);
     delete $3;
 }
 |
@@ -375,13 +379,13 @@ OPEN_PAREN CONS_NOTNOT_TOK info_definition CLOSE_PAREN {
     ConsInfo cons;
     cons.type = CONS_NOTNOT;
     cons.info = *$3;
+    consInfos.push_back(cons);
     delete $3;
 }
 ;
 
 condition_def:
 OPEN_PAREN COND_TOK condition_star CLOSE_PAREN {
-    cout << "cond def" << endl;
     $$ = $3;
 }
 ;
