@@ -2,7 +2,7 @@
 ### FLAGS
 CC     = g++
 CFLAGS = -Wall -g
-LIBS   = -lframe -L. -lboost_thread -lboost_system -lutility
+LIBS   = -lframe -L. -lboost_thread -lboost_system -lutility -pthread
 
 # FILES
 PARSER_SRC = parse_env.cpp lex_env.cpp

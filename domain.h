@@ -16,6 +16,8 @@ enum SortType {HUMAN, PLANT, COUCH, CHAIR, SOFA, BED, TABLE, WORKSPACE,
 
 enum SizeType {BIG, SMALL};
 
+enum DoorType {UNKNOWN_DOOR, DOOR_OPEN, DOOR_CLOSED};
+
 enum InfoType {I_ON, I_NEAR, I_PLATE, I_INSIDE, I_OPENED, I_CLOSED};
 
 enum STATE {SORT, COLOR, SIZE, TYPE, CLOSED, OPENED, HOLD, PLATE, AT};
@@ -23,10 +25,14 @@ enum STATE {SORT, COLOR, SIZE, TYPE, CLOSED, OPENED, HOLD, PLATE, AT};
 enum ACTION {MOVE, PICKUP, PUTDOWN, TOPLATE, FROMPLATE, OPEN, CLOSE,
              PUTIN, TAKEOUT};
 
+enum TaskType {T_GIVE, T_PUTON, T_GOTO, T_PUTDOWN, T_PICKUP, T_OPEN,
+               T_PUTIN, T_CLOSE, T_TAKEOUT};
+
 ColorType ColorStrToEnum(const char* str);
 SortType SortStrToEnum(const char* str);
 SizeType SizeStrToEnum(const char* str);
 InfoType InfoStrToEnum(const char* str);
+TaskType TaskStrToEnum(const char* str);
 
 class Object {
 public:
@@ -36,15 +42,17 @@ public:
     ColorType color;
     SortType sort;
     SizeType size;
+    DoorType door;
     unsigned loc;
     unsigned inside;
     bool isContainer;
-    bool opened;
 };
 
 class Task {
 public:
-
+    TaskType type;
+    Object arg1;
+    Object arg2;
 };
 
 class Domain {

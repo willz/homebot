@@ -6,6 +6,7 @@ using namespace std;
 static map<const char*, ColorType> colorMap;
 static map<const char*, SortType> sortMap;
 static map<const char*, InfoType> infoMap;
+static map<const char*, TaskType> taskMap;
 
 ColorType ColorStrToEnum(const char* str) {
     if (colorMap.empty()) {
@@ -67,6 +68,20 @@ InfoType InfoStrToEnum(const char* str) {
     return infoMap[str];
 }
 
+TaskType TaskStrToEnum(const char* str) {
+    if (taskMap.empty()) {
+        taskMap["give"] = T_GIVE;
+        taskMap["puton"] = T_PUTON;
+        taskMap["goto"] = T_GOTO;
+        taskMap["putdown"] = T_PUTDOWN;
+        taskMap["pickup"] = T_PICKUP;
+        taskMap["open"] = T_OPEN;
+        taskMap["putin"] = T_PUTIN;
+        taskMap["close"] = T_CLOSE;
+        taskMap["takeout"] = T_TAKEOUT;
+    }
+    return taskMap[str];
+}
 Object::Object()
     : color(UNKNOWN_COLOR), sort(UNKNOWN_SORT), loc(UNKNOWN_LOC)
     , isContainer(false) {

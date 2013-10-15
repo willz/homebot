@@ -78,11 +78,14 @@
 
 #include <map>
 #include <cstdio>
+#include <string>
+#include <iostream>
 #include "domain.h"
 
 using namespace std;
 
 static map<unsigned, Object> objects;
+static vector<Task> tasks;
 static unsigned plate = 0;
 static unsigned hold = 0;
 
@@ -91,9 +94,22 @@ int yylex(void);
 void yyerror(const char*) {
 }
 
+struct CondDef {
+    string pred;
+    string var;
+    string param;
+};
+
+struct TaskPred {
+    TaskType type;
+    string param1;
+    string param2;
+};
+
+
 
 /* Line 268 of yacc.c  */
-#line 97 "parse_env.cpp"
+#line 113 "parse_env.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -153,15 +169,18 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 21 "env.y"
+#line 37 "env.y"
 
     unsigned number;
     char* stringVal;
+    CondDef* pCondDef;
+    vector<CondDef>* pVecCondDef;
+    TaskPred* pTaskPred;
 
 
 
 /* Line 293 of yacc.c  */
-#line 165 "parse_env.cpp"
+#line 184 "parse_env.cpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -173,7 +192,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 177 "parse_env.cpp"
+#line 196 "parse_env.cpp"
 
 #ifdef short
 # undef short
@@ -450,10 +469,10 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyprhs[] =
 {
        0,     0,     3,     5,     7,    12,    15,    17,    23,    28,
-      33,    39,    45,    51,    57,    62,    67,    73,    78,    79,
-      82,    84,    86,    88,    90,    96,   102,   107,   113,   119,
-     124,   129,   135,   140,   146,   152,   158,   164,   170,   175,
-     178,   180,   186,   192
+      33,    39,    45,    51,    57,    62,    67,    73,    78,    80,
+      83,    85,    87,    89,    91,    97,   103,   108,   114,   120,
+     125,   130,   136,   141,   147,   153,   159,   165,   171,   176,
+     179,   181,   187,   193
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
@@ -466,29 +485,29 @@ static const yytype_int8 yyrhs[] =
        8,    16,    17,     4,    -1,     3,     9,    16,    17,     4,
       -1,     3,    10,    16,    17,     4,    -1,     3,    14,    16,
        4,    -1,     3,    15,    16,     4,    -1,     3,    11,    16,
-      16,     4,    -1,     3,    18,    32,     4,    -1,    -1,    33,
-      32,    -1,    34,    -1,    36,    -1,    38,    -1,    39,    -1,
-       3,    23,    35,    40,     4,    -1,     3,    24,    17,    17,
-       4,    -1,     3,    13,    17,     4,    -1,     3,    25,    17,
-      17,     4,    -1,     3,    11,    17,    17,     4,    -1,     3,
-      15,    17,     4,    -1,     3,    14,    17,     4,    -1,     3,
-      19,    37,    40,     4,    -1,     3,    17,    17,     4,    -1,
-       3,    17,    17,    17,     4,    -1,     3,    21,    37,    40,
-       4,    -1,     3,    21,    35,    40,     4,    -1,     3,    22,
-      37,    40,     4,    -1,     3,    22,    35,    40,     4,    -1,
-       3,    20,    41,     4,    -1,    42,    41,    -1,    42,    -1,
-       3,     7,    17,    17,     4,    -1,     3,     8,    17,    17,
-       4,    -1,     3,    10,    17,    17,     4,    -1
+      16,     4,    -1,     3,    18,    32,     4,    -1,    33,    -1,
+      33,    32,    -1,    34,    -1,    36,    -1,    38,    -1,    39,
+      -1,     3,    23,    35,    40,     4,    -1,     3,    24,    17,
+      17,     4,    -1,     3,    13,    17,     4,    -1,     3,    25,
+      17,    17,     4,    -1,     3,    11,    17,    17,     4,    -1,
+       3,    15,    17,     4,    -1,     3,    14,    17,     4,    -1,
+       3,    19,    37,    40,     4,    -1,     3,    17,    17,     4,
+      -1,     3,    17,    17,    17,     4,    -1,     3,    21,    37,
+      40,     4,    -1,     3,    21,    35,    40,     4,    -1,     3,
+      22,    37,    40,     4,    -1,     3,    22,    35,    40,     4,
+      -1,     3,    20,    41,     4,    -1,    42,    41,    -1,    42,
+      -1,     3,     7,    17,    17,     4,    -1,     3,     8,    17,
+      17,     4,    -1,     3,    10,    17,    17,     4,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    56,    56,    58,    62,    67,    69,    73,    81,    85,
-      89,    97,   105,   113,   121,   129,   137,   147,   150,   153,
-     157,   159,   161,   163,   167,   171,   174,   177,   180,   183,
-     186,   191,   195,   198,   203,   205,   209,   211,   215,   219,
-     221,   225,   228,   231
+       0,    79,    79,    81,    85,    91,    93,    97,   105,   109,
+     113,   121,   129,   137,   145,   153,   161,   171,   178,   182,
+     188,   190,   192,   194,   198,   202,   205,   208,   211,   214,
+     217,   222,   254,   260,   269,   271,   275,   277,   281,   287,
+     293,   300,   307,   314
 };
 #endif
 
@@ -535,7 +554,7 @@ static const yytype_uint8 yyr1[] =
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     1,     1,     4,     2,     1,     5,     4,     4,
-       5,     5,     5,     5,     4,     4,     5,     4,     0,     2,
+       5,     5,     5,     5,     4,     4,     5,     4,     1,     2,
        1,     1,     1,     1,     5,     5,     4,     5,     5,     4,
        4,     5,     4,     5,     5,     5,     5,     5,     4,     2,
        1,     5,     5,     5
@@ -546,7 +565,7 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     2,     3,     0,    18,     1,     0,     0,
+       0,     0,     0,     2,     3,     0,     0,     1,     0,     0,
        6,     0,     0,    18,    20,    21,    22,    23,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     4,     5,
        0,     0,     0,     0,    17,    19,     0,     0,     0,     0,
@@ -1492,15 +1511,16 @@ yyreduce:
         case 4:
 
 /* Line 1806 of yacc.c  */
-#line 62 "env.y"
+#line 85 "env.y"
     {
+    cout << "domain" << endl;
 }
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 73 "env.y"
+#line 97 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1513,7 +1533,7 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 81 "env.y"
+#line 105 "env.y"
     {
     plate = (yyvsp[(3) - (4)].number);
 }
@@ -1522,7 +1542,7 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 85 "env.y"
+#line 109 "env.y"
     {
     hold = (yyvsp[(3) - (4)].number);
 }
@@ -1531,7 +1551,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 89 "env.y"
+#line 113 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1544,7 +1564,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 97 "env.y"
+#line 121 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1557,7 +1577,7 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 105 "env.y"
+#line 129 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1570,7 +1590,7 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 113 "env.y"
+#line 137 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1583,33 +1603,33 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 121 "env.y"
+#line 145 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (4)].number));
     if (it == objects.end()) {
         objects[(yyvsp[(3) - (4)].number)] = Object((yyvsp[(3) - (4)].number));
     }
-    objects[(yyvsp[(3) - (4)].number)].opened = false;
+    objects[(yyvsp[(3) - (4)].number)].door = DOOR_CLOSED;
 }
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 129 "env.y"
+#line 153 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (4)].number));
     if (it == objects.end()) {
         objects[(yyvsp[(3) - (4)].number)] = Object((yyvsp[(3) - (4)].number));
     }
-    objects[(yyvsp[(3) - (4)].number)].opened = true;
+    objects[(yyvsp[(3) - (4)].number)].door = DOOR_OPEN;
 }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 137 "env.y"
+#line 161 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1619,10 +1639,37 @@ yyreduce:
 }
     break;
 
-  case 25:
+  case 17:
 
 /* Line 1806 of yacc.c  */
 #line 171 "env.y"
+    {
+    cout << "ins_definition" << endl;
+}
+    break;
+
+  case 18:
+
+/* Line 1806 of yacc.c  */
+#line 178 "env.y"
+    {
+    cout << "ins_body" << endl;
+}
+    break;
+
+  case 19:
+
+/* Line 1806 of yacc.c  */
+#line 182 "env.y"
+    {
+    cout << "ins_body_star" << endl;
+}
+    break;
+
+  case 25:
+
+/* Line 1806 of yacc.c  */
+#line 202 "env.y"
     {
 }
     break;
@@ -1630,7 +1677,7 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 174 "env.y"
+#line 205 "env.y"
     {
 }
     break;
@@ -1638,7 +1685,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 177 "env.y"
+#line 208 "env.y"
     {
 }
     break;
@@ -1646,7 +1693,7 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 180 "env.y"
+#line 211 "env.y"
     {
 }
     break;
@@ -1654,7 +1701,7 @@ yyreduce:
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 183 "env.y"
+#line 214 "env.y"
     {
 }
     break;
@@ -1662,55 +1709,139 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 186 "env.y"
+#line 217 "env.y"
     {
+}
+    break;
+
+  case 31:
+
+/* Line 1806 of yacc.c  */
+#line 222 "env.y"
+    {
+    Task t;
+    t.type = (yyvsp[(3) - (5)].pTaskPred)->type;
+    for (size_t i = 0; i < (yyvsp[(4) - (5)].pVecCondDef)->size(); ++i) {
+        CondDef cond = (*(yyvsp[(4) - (5)].pVecCondDef))[i];
+        if (cond.var == (yyvsp[(3) - (5)].pTaskPred)->param1) {
+            if (cond.pred == "sort") {
+                t.arg1.sort = SortStrToEnum(cond.param.c_str());
+            } else if (cond.pred == "color") {
+                t.arg1.color = ColorStrToEnum(cond.param.c_str());
+            } else {
+                t.arg1.isContainer = true;
+            }
+        }
+        else {
+            if (cond.pred == "sort") {
+                t.arg2.sort = SortStrToEnum(cond.param.c_str());
+            } else if (cond.pred == "color") {
+                t.arg2.color = ColorStrToEnum(cond.param.c_str());
+            } else {
+                t.arg2.isContainer = true;
+            }
+        }
+    }
+    tasks.push_back(t);
+    cout << tasks.size() << endl;
+    delete (yyvsp[(3) - (5)].pTaskPred);
+    delete (yyvsp[(4) - (5)].pVecCondDef);
 }
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 195 "env.y"
+#line 254 "env.y"
     {
+    (yyval.pTaskPred) = new TaskPred();
+    (yyval.pTaskPred)->type = TaskStrToEnum((yyvsp[(2) - (4)].stringVal));
+    (yyval.pTaskPred)->param1 = (yyvsp[(3) - (4)].stringVal);
 }
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 198 "env.y"
+#line 260 "env.y"
     {
+    (yyval.pTaskPred) = new TaskPred();
+    (yyval.pTaskPred)->type = TaskStrToEnum((yyvsp[(2) - (5)].stringVal));
+    (yyval.pTaskPred)->param1 = (yyvsp[(3) - (5)].stringVal);
+    (yyval.pTaskPred)->param2 = (yyvsp[(4) - (5)].stringVal);
+}
+    break;
+
+  case 38:
+
+/* Line 1806 of yacc.c  */
+#line 281 "env.y"
+    {
+    (yyval.pVecCondDef) = (yyvsp[(3) - (4)].pVecCondDef);
+}
+    break;
+
+  case 39:
+
+/* Line 1806 of yacc.c  */
+#line 287 "env.y"
+    {
+    (yyvsp[(2) - (2)].pVecCondDef)->push_back(*(yyvsp[(1) - (2)].pCondDef));
+    (yyval.pVecCondDef) = (yyvsp[(2) - (2)].pVecCondDef);
+    delete (yyvsp[(1) - (2)].pCondDef);
+}
+    break;
+
+  case 40:
+
+/* Line 1806 of yacc.c  */
+#line 293 "env.y"
+    {
+    (yyval.pVecCondDef) = new vector<CondDef>(1, *(yyvsp[(1) - (1)].pCondDef));
+    delete (yyvsp[(1) - (1)].pCondDef);
 }
     break;
 
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 225 "env.y"
+#line 300 "env.y"
     {
+    (yyval.pCondDef) = new CondDef();
+    (yyval.pCondDef)->pred = "sort";
+    (yyval.pCondDef)->var = (yyvsp[(3) - (5)].stringVal);
+    (yyval.pCondDef)->param = (yyvsp[(4) - (5)].stringVal);
 }
     break;
 
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 228 "env.y"
+#line 307 "env.y"
     {
+    (yyval.pCondDef) = new CondDef();
+    (yyval.pCondDef)->pred = "color";
+    (yyval.pCondDef)->var = (yyvsp[(3) - (5)].stringVal);
+    (yyval.pCondDef)->param = (yyvsp[(4) - (5)].stringVal);
 }
     break;
 
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 231 "env.y"
+#line 314 "env.y"
     {
+    (yyval.pCondDef) = new CondDef();
+    (yyval.pCondDef)->pred = "type";
+    (yyval.pCondDef)->var = (yyvsp[(3) - (5)].stringVal);
+    (yyval.pCondDef)->param = (yyvsp[(4) - (5)].stringVal);
 }
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1714 "parse_env.cpp"
+#line 1845 "parse_env.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1941,7 +2072,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 276 "env.y"
+#line 363 "env.y"
 
 
 
@@ -1951,5 +2082,10 @@ void parse_env(const char* str, Domain& domain) {
     env_scan_string(str);
     yyparse();
     domain.SetEnv(objects, plate, hold);
+}
+
+void parse_task(const char* str, Domain& domain) {
+    env_scan_string(str);
+    yyparse();
 }
 

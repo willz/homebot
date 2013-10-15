@@ -5,6 +5,7 @@
 using namespace std;
 
 extern void parse_env(const char* str, Domain& domain);
+extern void parse_task(const char* str, Domain& domain);
 
 HomeBot::HomeBot() : Plug("HomeBot") {
     // blank line
@@ -18,6 +19,7 @@ void HomeBot::Plan()
     cout << "# TaskDes:\n" << GetTaskDes() << endl;
     Domain domain;
     parse_env(GetEnvDes().c_str(), domain);
+    parse_task(GetTaskDes().c_str(), domain);
 
     Move(5);
     Open(5);

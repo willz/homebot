@@ -1,11 +1,14 @@
 %{
 #include <map>
 #include <cstdio>
+#include <string>
+#include <iostream>
 #include "domain.h"
 
 using namespace std;
 
 static map<unsigned, Object> objects;
+static vector<Task> tasks;
 static unsigned plate = 0;
 static unsigned hold = 0;
 
@@ -13,6 +16,19 @@ static unsigned hold = 0;
 int yylex(void);
 void yyerror(const char*) {
 }
+
+struct CondDef {
+    string pred;
+    string var;
+    string param;
+};
+
+struct TaskPred {
+    TaskType type;
+    string param1;
+    string param2;
+};
+
 %}
 
 
@@ -21,10 +37,17 @@ void yyerror(const char*) {
 %union {
     unsigned number;
     char* stringVal;
+    CondDef* pCondDef;
+    vector<CondDef>* pVecCondDef;
+    TaskPred* pTaskPred;
 }
 
 %type <number> NUMBER
 %type <stringVal> WORD
+%type <pCondDef> condition
+%type <pVecCondDef> condition_star
+%type <pVecCondDef> condition_def
+%type <pTaskPred> task_predicate
 
 %token OPEN_PAREN
 %token CLOSE_PAREN
@@ -60,6 +83,7 @@ ins_definition
 
 domain_definition:
 OPEN_PAREN DOMAIN_TOK env_definition CLOSE_PAREN {
+    cout << "domain" << endl;
 }
 ;
 
@@ -123,7 +147,7 @@ OPEN_PAREN CLOSED_TOK NUMBER CLOSE_PAREN {
     if (it == objects.end()) {
         objects[$3] = Object($3);
     }
-    objects[$3].opened = false;
+    objects[$3].door = DOOR_CLOSED;
 }
 |
 OPEN_PAREN OPENED_TOK NUMBER CLOSE_PAREN {
@@ -131,7 +155,7 @@ OPEN_PAREN OPENED_TOK NUMBER CLOSE_PAREN {
     if (it == objects.end()) {
         objects[$3] = Object($3);
     }
-    objects[$3].opened = true;
+    objects[$3].door = DOOR_OPEN;
 }
 |
 OPEN_PAREN INSIDE_TOK NUMBER NUMBER CLOSE_PAREN {
@@ -144,13 +168,20 @@ OPEN_PAREN INSIDE_TOK NUMBER NUMBER CLOSE_PAREN {
 ;
 
 ins_definition:
-OPEN_PAREN INS_TOK ins_body_star CLOSE_PAREN
+OPEN_PAREN INS_TOK ins_body_star CLOSE_PAREN {
+    cout << "ins_definition" << endl;
+}
 ;
 
 ins_body_star:
 /* empty */
+ins_body {
+    cout << "ins_body" << endl;
+}
 |
-ins_body ins_body_star
+ins_body ins_body_star {
+    cout << "ins_body_star" << endl;
+}
 ;
 
 ins_body:
@@ -188,14 +219,49 @@ OPEN_PAREN CLOSED_TOK WORD CLOSE_PAREN {
 ;
 
 task_definition:
-OPEN_PAREN TASK_TOK task_predicate condition_def CLOSE_PAREN
+OPEN_PAREN TASK_TOK task_predicate condition_def CLOSE_PAREN {
+    Task t;
+    t.type = $3->type;
+    for (size_t i = 0; i < $4->size(); ++i) {
+        CondDef cond = (*$4)[i];
+        if (cond.var == $3->param1) {
+            if (cond.pred == "sort") {
+                t.arg1.sort = SortStrToEnum(cond.param.c_str());
+            } else if (cond.pred == "color") {
+                t.arg1.color = ColorStrToEnum(cond.param.c_str());
+            } else {
+                t.arg1.isContainer = true;
+            }
+        }
+        else {
+            if (cond.pred == "sort") {
+                t.arg2.sort = SortStrToEnum(cond.param.c_str());
+            } else if (cond.pred == "color") {
+                t.arg2.color = ColorStrToEnum(cond.param.c_str());
+            } else {
+                t.arg2.isContainer = true;
+            }
+        }
+    }
+    tasks.push_back(t);
+    cout << tasks.size() << endl;
+    delete $3;
+    delete $4;
+}
 ;
 
 task_predicate:
 OPEN_PAREN WORD WORD CLOSE_PAREN {
+    $$ = new TaskPred();
+    $$->type = TaskStrToEnum($2);
+    $$->param1 = $3;
 }
 |
 OPEN_PAREN WORD WORD WORD CLOSE_PAREN {
+    $$ = new TaskPred();
+    $$->type = TaskStrToEnum($2);
+    $$->param1 = $3;
+    $$->param2 = $4;
 }
 ;
 
@@ -212,23 +278,44 @@ OPEN_PAREN CONS_NOTNOT_TOK info_predicate condition_def CLOSE_PAREN
 ;
 
 condition_def:
-OPEN_PAREN COND_TOK condition_star CLOSE_PAREN
+OPEN_PAREN COND_TOK condition_star CLOSE_PAREN {
+    $$ = $3;
+}
 ;
 
 condition_star:
-condition condition_star
+condition condition_star {
+    $2->push_back(*$1);
+    $$ = $2;
+    delete $1;
+}
 |
-condition
+condition {
+    $$ = new vector<CondDef>(1, *$1);
+    delete $1;
+}
 ;
 
 condition:
 OPEN_PAREN SORT_TOK WORD WORD CLOSE_PAREN {
+    $$ = new CondDef();
+    $$->pred = "sort";
+    $$->var = $3;
+    $$->param = $4;
 }
 |
 OPEN_PAREN COLOR_TOK WORD WORD CLOSE_PAREN {
+    $$ = new CondDef();
+    $$->pred = "color";
+    $$->var = $3;
+    $$->param = $4;
 }
 |
 OPEN_PAREN TYPE_TOK WORD WORD CLOSE_PAREN {
+    $$ = new CondDef();
+    $$->pred = "type";
+    $$->var = $3;
+    $$->param = $4;
 }
 ;
 
@@ -282,4 +369,9 @@ void parse_env(const char* str, Domain& domain) {
     env_scan_string(str);
     yyparse();
     domain.SetEnv(objects, plate, hold);
+}
+
+void parse_task(const char* str, Domain& domain) {
+    env_scan_string(str);
+    yyparse();
 }
