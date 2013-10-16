@@ -1,4 +1,5 @@
 #include "domain.h"
+#include "planner.h"
 #include <cstring>
 #include <iostream>
 
@@ -14,6 +15,7 @@ State gInitState;
 vector<Cons> gNotC;
 vector<Cons> gNotNotC;
 vector<unsigned> gContainers;
+vector<ETask> gTasks;
 
 
 ColorType ColorStrToEnum(const char* str) {
@@ -119,10 +121,15 @@ void Domain::SetInfo(const vector<Info>& infos, const vector<ConsTask>& consTask
 }
 
 void Domain::Preprocess() {
+    gInitState = State();
     gContainers.clear();
     gNotC.clear();
     gNotNotC.clear();
-    State state;
+    gTasks.clear();
+
+    State& state = gInitState;
+    state.hold = _hold;
+    state.plate = _plate;
     // location and door state
     for (auto i : _objects) {
         state.pos[i.first] = i.second.loc;
@@ -137,15 +144,13 @@ void Domain::Preprocess() {
     // inside state
     for (auto i : _objects) {
         if (i.second.inside != UNKNOWN) {
-            state.inside[i.second.inside] = i.first;
+            if (state.inside.count(i.second.inside) == 0) {
+                state.inside.insert( make_pair(i.second.inside, set<unsigned>()));
+            }
+            state.inside[i.second.inside].insert(i.first);
             state.pos[i.first] = state.pos[i.second.inside];
         }
     }
-    for (int i = 0; i <= 10; ++i) {
-        cout << i << " " << state.pos[i] << endl;
-    }
-    state.plate = _plate;
-    state.hold = _hold;
 
     // process info
     for (auto i : _infos) {
@@ -180,6 +185,29 @@ void Domain::Preprocess() {
         }
         cout << endl;
     }
+    // plate and hand
+    if (state.plate && state.plate != UNKNOWN) {
+        state.pos[state.plate] = state.pos[0];
+    }
+    if (state.hold && state.hold != UNKNOWN) {
+        state.pos[state.hold] = state.pos[0];
+    }
+
+    AnalyzeInfo();
+    state.plate = _plate;
+    state.hold = _hold;
+
+    // preprocess task
+    for (auto i : _tasks) {
+        ETask e;
+        e.type = i.type;
+        GetObjects(i.arg1, e.arg1);
+        cout << "task " << " " << e.arg1.front() << endl;
+        if (e.type == T_GIVE || e.type == T_PUTON || e.type == T_PUTIN || e.type == T_TAKEOUT) {
+            GetObjects(i.arg2, e.arg2);
+        }
+        gTasks.push_back(e);
+    }
 }
 
 
@@ -189,7 +217,13 @@ void Domain::GetObjects(const Object& filter, list<unsigned>& result,
         Object obj = i.second;
         if (filter.sort == obj.sort) {
             if (filter.color == UNKNOWN_COLOR || filter.color == obj.color) {
-                result.push_back(obj.id);
+                if (requireLoc) {
+                    if (obj.loc != UNKNOWN_LOC) {
+                        result.push_back(obj.id);
+                    }
+                } else {
+                    result.push_back(obj.id);
+                }
             }
         }
     }

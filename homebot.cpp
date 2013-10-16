@@ -24,8 +24,17 @@ void HomeBot::Plan()
     Planner planner;
     planner.SetDomain(domain);
     domain.Preprocess();
-    cout << "here" << endl;
+    AnalyzeTask();
 
+    ShowState();
+    //string str = AskLoc(8);
+    //cout << str << endl;
+    //RefreshEnv(str);
+    //ShowState();
+    IDA_STAR();
+
+    ApplyPlan();
+    /*
     Move(5);
     Open(5);
     TakeOut(8, 5);
@@ -34,6 +43,92 @@ void HomeBot::Plan()
     Move(3);
     FromPlate(8);
     PutDown(8);
+    */
+}
+
+bool HomeBot::ApplyPlan() {
+    bool ret;
+    auto& s = gInitState;
+    for (int i = 0; i < opsnum; ++i) {
+        if (ops[i].op == MOVE) {
+            ret = Move(ops[i].arg1);
+            if (ret) {
+                s.pos[0] = ops[i].arg1;
+                if (s.hold) {
+                    s.pos[s.hold] = ops[i].arg1;
+                }
+                if (s.plate) {
+                    s.pos[s.plate] = ops[i].arg1;
+                }
+            } else {
+                return false;
+            }
+        } else if (ops[i].op == PICKUP) {
+            ret = PickUp(ops[i].arg1);
+            if (ret) {
+                s.hold = ops[i].arg1;
+            } else {
+                return false;
+            }
+        } else if (ops[i].op == PUTDOWN) {
+            ret = PutDown(ops[i].arg1);
+            if (ret) {
+                s.hold = 0;
+            } else {
+                return false;
+            }
+        } else if (ops[i].op == TOPLATE) {
+            ret = ToPlate(ops[i].arg1);
+            if (ret) {
+                s.plate = s.hold;
+                s.hold = 0;
+            } else {
+                return false;
+            }
+        } else if (ops[i].op == FROMPLATE) {
+            ret = FromPlate(ops[i].arg1);
+            if (ret) {
+                s.hold = s.plate;
+                s.plate = 0;
+            } else {
+                return false;
+            }
+        } else if (ops[i].op == OPEN) {
+            ret = Open(ops[i].arg1);
+            if (ret) {
+                s.doorOpen.insert(ops[i].arg1);
+            } else {
+                return false;
+            }
+        } else if (ops[i].op == CLOSE) {
+            ret = Close(ops[i].arg1);
+            if (ret) {
+                s.doorOpen.erase(ops[i].arg1);
+            } else {
+                return false;
+            }
+        } else if (ops[i].op == PUTIN) {
+            ret = PutIn(ops[i].arg1, ops[i].arg2);
+            if (ret) {
+                if (s.inside.count(ops[i].arg2) == 0) {
+                    s.inside.insert(make_pair(ops[i].arg2, set<unsigned>()));
+                }
+                s.inside[ops[i].arg2].erase(ops[i].arg1);
+                s.hold = 0;
+            } else {
+                return false;
+            }
+        } else if (ops[i].op == TAKEOUT) {
+            ret = TakeOut(ops[i].arg1, ops[i].arg2);
+            if (ret) {
+                s.inside[ops[i].arg2].erase(ops[i].arg1);
+                s.hold = ops[i].arg1;
+            } else {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 void HomeBot::Fini()

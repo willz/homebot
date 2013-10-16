@@ -99,9 +99,7 @@ ins_definition
 ;
 
 domain_definition:
-OPEN_PAREN DOMAIN_TOK env_definition CLOSE_PAREN {
-    cout << "domain" << endl;
-}
+OPEN_PAREN DOMAIN_TOK env_definition CLOSE_PAREN
 ;
 
 env_definition:
@@ -116,7 +114,6 @@ OPEN_PAREN AT_TOK NUMBER NUMBER CLOSE_PAREN {
     if (it == objects.end()) {
         objects[$3] = Object($3);
     }
-    //cout << "parse " << $3 << " " << $4 << endl;
     objects[$3].loc = $4;
 }
 |
@@ -186,27 +183,20 @@ OPEN_PAREN INSIDE_TOK NUMBER NUMBER CLOSE_PAREN {
 ;
 
 ins_definition:
-OPEN_PAREN INS_TOK ins_body_star CLOSE_PAREN {
-    cout << "ins_definition" << endl;
-}
+OPEN_PAREN INS_TOK ins_body_star CLOSE_PAREN
 ;
 
 ins_body_star:
 /* empty */
-ins_body ins_body_star {
-    cout << "ins_body_star" << endl;
-}
+ins_body ins_body_star
 |
-ins_body {
-    cout << "ins_body" << endl;
-}
+ins_body
 ;
 
 ins_body:
 info_definition {
     infos.push_back(*$1);
     delete $1;
-    cout << "ins info" << endl;
 }
 |
 task_definition {

@@ -10,6 +10,7 @@ public:
 protected:
     void Plan();
     void Fini();
+    bool ApplyPlan();
 };
 
 #endif

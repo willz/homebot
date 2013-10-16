@@ -25,7 +25,7 @@ enum InfoType {I_ON, I_NEAR, I_PLATE, I_INSIDE, I_OPENED, I_CLOSED};
 
 enum STATE {SORT, COLOR, SIZE, TYPE, CLOSED, OPENED, HOLD, PLATE, AT};
 
-enum ACTION {MOVE, PICKUP, PUTDOWN, TOPLATE, FROMPLATE, OPEN, CLOSE,
+enum ACTION {UNKNOWN_ACTION = 0, MOVE, PICKUP, PUTDOWN, TOPLATE, FROMPLATE, OPEN, CLOSE,
              PUTIN, TAKEOUT};
 
 enum TaskType {T_GIVE, T_PUTON, T_GOTO, T_PUTDOWN, T_PICKUP, T_OPEN,
@@ -87,18 +87,37 @@ struct Cons {
     std::list<unsigned> arg2;
 };
 
+// expand task
+struct ETask {
+    TaskType type;
+    std::list<unsigned> arg1;
+    std::list<unsigned> arg2;
+};
+
+struct Op {
+    ACTION op;
+    unsigned arg1;
+    unsigned arg2;
+};
+
 struct State {
-    State() : plate(0), hold(0) {
-        memset(pos, 0, MAX_OBJECT_NUM * sizeof(unsigned));
+    State() : plate(UNKNOWN), hold(UNKNOWN) {
+        memset(pos, 1, MAX_OBJECT_NUM * sizeof(unsigned));
+    }
+    State(const State& s) {
+        memcpy(pos, s.pos, MAX_OBJECT_NUM * sizeof(unsigned));
+        plate = s.plate;
+        hold = s.hold;
+        doorOpen = s.doorOpen;
+        inside = s.inside;
+        info = s.info;
     }
     unsigned pos[MAX_OBJECT_NUM];
     unsigned plate;
     unsigned hold;
     std::set<unsigned> doorOpen;
-    std::map<unsigned, unsigned> inside;
+    std::map<unsigned, std::set<unsigned>> inside;
     std::list<Cons> info;
-    Cons notC;
-    Cons notnotC;
 };
 
 class Domain {
@@ -126,5 +145,6 @@ extern State gInitState;
 extern std::vector<Cons> gNotC;
 extern std::vector<Cons> gNotNotC;
 extern std::vector<unsigned> gContainers;
+extern std::vector<ETask> gTasks;
 
 #endif
