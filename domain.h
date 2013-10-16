@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <cstring>
+#include <list>
 
 const unsigned UNKNOWN_LOC = 0xffffffff;
 const unsigned UNKNOWN = 0xffffffff;
@@ -80,6 +81,12 @@ public:
 
 const int MAX_OBJECT_NUM = 50;
 
+struct Cons {
+    InfoType type;
+    std::list<unsigned> arg1;
+    std::list<unsigned> arg2;
+};
+
 struct State {
     State() : plate(0), hold(0) {
         memset(pos, 0, MAX_OBJECT_NUM * sizeof(unsigned));
@@ -89,6 +96,9 @@ struct State {
     unsigned hold;
     std::set<unsigned> doorOpen;
     std::map<unsigned, unsigned> inside;
+    std::list<Cons> info;
+    Cons notC;
+    Cons notnotC;
 };
 
 class Domain {
@@ -98,8 +108,8 @@ public:
     void SetTask(const std::vector<Task>& tasks);
     void SetInfo(const std::vector<Info>& infos, const std::vector<ConsTask>& consTasks,
                  const std::vector<ConsInfo>& consInfos);
-    void GetObjects(const Object& filter, std::vector<unsigned>& result,
-                    bool requireLoc) const;
+    void GetObjects(const Object& filter, std::list<unsigned>& result,
+                    bool requireLoc = false) const;
     void Preprocess();
 
 private:
@@ -113,6 +123,8 @@ private:
 };
 
 extern State gInitState;
+extern std::vector<Cons> gNotC;
+extern std::vector<Cons> gNotNotC;
 extern std::vector<unsigned> gContainers;
 
 #endif

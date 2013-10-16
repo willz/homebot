@@ -204,6 +204,8 @@ ins_body {
 
 ins_body:
 info_definition {
+    infos.push_back(*$1);
+    delete $1;
     cout << "ins info" << endl;
 }
 |
@@ -218,8 +220,7 @@ cons_notnot_definition
 
 info_definition:
 OPEN_PAREN INFO_TOK info_combine CLOSE_PAREN {
-    infos.push_back(*$3);
-    delete $3;
+    $$ = $3;
 }
 ;
 
@@ -500,5 +501,5 @@ void parse_task(const char* str, Domain& domain) {
     cout << consInfos.size() << endl;
 
     domain.SetTask(tasks);
-    //domain.SetInfo(infos, consTasks, consInfos);
+    domain.SetInfo(infos, consTasks, consInfos);
 }

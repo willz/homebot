@@ -94,3 +94,61 @@ void Planner::_BuildGraph() {
         l += 2;
     }
 }
+
+
+void AnalyzeInfo() {
+    bool changed = true;
+    auto& info = gInitState.info;
+    auto& pos = gInitState.pos;
+    while (!info.empty() && changed) {
+        changed = false;
+        for (auto it = info.begin(); it != info.end(); ) {
+            switch (it->type) {
+            case I_OPENED:
+                changed = true;
+                gInitState.doorOpen.insert(it->arg1.front());
+                it = info.erase(it);
+                break;
+            case I_CLOSED:
+                // TODO: can do nothing?
+                break;
+            case I_PLATE:
+                for (auto it1 = it->arg1.begin(); it1 != it->arg1.end(); ) {
+                    // known and not at robot
+                    if (pos[*it1] != UNKNOWN_LOC && pos[*it1] != pos[0]) {
+                        it1 = it->arg1.erase(it1);
+                    } else {
+                        ++it1;
+                    }
+                }
+                if (it->arg1.size() == 1) {
+                    changed = true;
+                    gInitState.plate = it->arg1.front();
+                    pos[gInitState.plate] = pos[0];
+                    it = info.erase(it);
+                }
+                break;
+            case I_NEAR:
+                unsigned bigObj = it->arg2.front();
+                for (auto it1 = it->arg1.begin(); it1 != it->arg1.end(); ) {
+                    if (pos[*it1] != UNKNOWN_LOC && pos[*it1] != pos[bigObj]) {
+                        it1 = it->arg1.erase(it1);
+                    } else {
+                        ++it1;
+                    }
+                }
+                // remaning is the same place
+                if (it->arg1.size() == 1) {
+                    changed = true;
+                    pos[it->arg1.front()] = pos[bigObj];
+                    it = info.erase(it);
+                }
+            }
+            if (!changed) {
+                ++it;
+            } else {
+                break;
+            }
+        }
+    }
+}

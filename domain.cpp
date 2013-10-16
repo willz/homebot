@@ -4,13 +4,15 @@
 
 using namespace std;
 
-static map<const char*, ColorType> colorMap;
-static map<const char*, SortType> sortMap;
-static map<const char*, InfoType> infoMap;
-static map<const char*, TaskType> taskMap;
+static map<string, ColorType> colorMap;
+static map<string, SortType> sortMap;
+static map<string, InfoType> infoMap;
+static map<string, TaskType> taskMap;
 
 
 State gInitState;
+vector<Cons> gNotC;
+vector<Cons> gNotNotC;
 vector<unsigned> gContainers;
 
 
@@ -90,12 +92,12 @@ TaskType TaskStrToEnum(const char* str) {
 }
 Object::Object()
     : color(UNKNOWN_COLOR), sort(UNKNOWN_SORT), loc(UNKNOWN_LOC)
-    , door(UNKNOWN_DOOR), isContainer(false) {
+    , inside(UNKNOWN), door(UNKNOWN_DOOR), isContainer(false) {
 }
 
 Object::Object(unsigned x)
     : id(x), color(UNKNOWN_COLOR), sort(UNKNOWN_SORT), loc(UNKNOWN_LOC)
-    , door(UNKNOWN_DOOR), isContainer(false) {
+    , inside(UNKNOWN), door(UNKNOWN_DOOR), isContainer(false) {
 }
 
 void Domain::SetEnv(const map<unsigned, Object>& objects, unsigned plate,
@@ -117,10 +119,13 @@ void Domain::SetInfo(const vector<Info>& infos, const vector<ConsTask>& consTask
 }
 
 void Domain::Preprocess() {
+    gContainers.clear();
+    gNotC.clear();
+    gNotNotC.clear();
     State state;
+    // location and door state
     for (auto i : _objects) {
         state.pos[i.first] = i.second.loc;
-        cout << i.first << ": " << i.second.loc << endl;
         if (i.second.isContainer) {
             gContainers.push_back(i.first);
             if (i.second.door == DOOR_OPENED) {
@@ -129,11 +134,63 @@ void Domain::Preprocess() {
             }
         }
     }
+    // inside state
+    for (auto i : _objects) {
+        if (i.second.inside != UNKNOWN) {
+            state.inside[i.second.inside] = i.first;
+            state.pos[i.first] = state.pos[i.second.inside];
+        }
+    }
+    for (int i = 0; i <= 10; ++i) {
+        cout << i << " " << state.pos[i] << endl;
+    }
     state.plate = _plate;
     state.hold = _hold;
+
+    // process info
+    for (auto i : _infos) {
+        Cons cons;
+        cons.type = i.type;
+        GetObjects(i.arg1, cons.arg1);
+        if (cons.type == I_ON || cons.type == I_NEAR || cons.type == I_INSIDE) {
+            GetObjects(i.arg2, cons.arg2);
+        }
+        state.info.push_back(cons);
+    }
+
+    // get constain objects
+    for (auto i : _consInfos) {
+        Cons cons;
+        cons.type = i.info.type;
+        GetObjects(i.info.arg1, cons.arg1);
+        if (cons.type == I_ON || cons.type == I_NEAR || cons.type == I_INSIDE) {
+            GetObjects(i.info.arg2, cons.arg2);
+        }
+        if (i.type == CONS_NOT) {
+            gNotC.push_back(cons);
+        } else {
+            gNotNotC.push_back(cons);
+        }
+        cout << "here consinfo" << endl;
+    }
+    for (auto i : gNotNotC) {
+        cout << "notnot" << endl;
+        for (auto j : i.arg1) {
+            cout << j << " ";
+        }
+        cout << endl;
+    }
 }
 
-void Domain::GetObjects(const Object& filter, vector<unsigned>& result,
-                        bool requireLoc) const {
 
+void Domain::GetObjects(const Object& filter, list<unsigned>& result,
+                        bool requireLoc) const {
+    for (auto i : _objects) {
+        Object obj = i.second;
+        if (filter.sort == obj.sort) {
+            if (filter.color == UNKNOWN_COLOR || filter.color == obj.color) {
+                result.push_back(obj.id);
+            }
+        }
+    }
 }

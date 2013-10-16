@@ -17,4 +17,6 @@ private:
     std::vector<unsigned> _bigObjs;
 };
 
+void AnalyzeInfo();
+
 #endif
