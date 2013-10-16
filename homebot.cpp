@@ -1,5 +1,6 @@
 #include "homebot.h"
 #include "domain.h"
+#include "planner.h"
 #include <iostream>
 
 using namespace std;
@@ -20,6 +21,10 @@ void HomeBot::Plan()
     Domain domain;
     parse_env(GetEnvDes().c_str(), domain);
     parse_task(GetTaskDes().c_str(), domain);
+    Planner planner;
+    planner.SetDomain(domain);
+    domain.Preprocess();
+    cout << "here" << endl;
 
     Move(5);
     Open(5);

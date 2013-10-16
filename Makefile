@@ -1,13 +1,13 @@
 
 ### FLAGS
 CC     = g++
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -std=c++11
 LIBS   = -lframe -L. -lboost_thread -lboost_system -lutility -pthread
 
 # FILES
 PARSER_SRC = parse_env.cpp lex_env.cpp
 PARSER_OBJ = parse_env.o
-SOURCES = main.cpp homebot.cpp domain.cpp
+SOURCES = main.cpp homebot.cpp domain.cpp planner.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 # Implicit rules

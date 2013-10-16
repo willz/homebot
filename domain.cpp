@@ -1,5 +1,6 @@
 #include "domain.h"
 #include <cstring>
+#include <iostream>
 
 using namespace std;
 
@@ -7,6 +8,11 @@ static map<const char*, ColorType> colorMap;
 static map<const char*, SortType> sortMap;
 static map<const char*, InfoType> infoMap;
 static map<const char*, TaskType> taskMap;
+
+
+State gInitState;
+vector<unsigned> gContainers;
+
 
 ColorType ColorStrToEnum(const char* str) {
     if (colorMap.empty()) {
@@ -84,12 +90,12 @@ TaskType TaskStrToEnum(const char* str) {
 }
 Object::Object()
     : color(UNKNOWN_COLOR), sort(UNKNOWN_SORT), loc(UNKNOWN_LOC)
-    , isContainer(false) {
+    , door(UNKNOWN_DOOR), isContainer(false) {
 }
 
 Object::Object(unsigned x)
     : id(x), color(UNKNOWN_COLOR), sort(UNKNOWN_SORT), loc(UNKNOWN_LOC)
-    , isContainer(false) {
+    , door(UNKNOWN_DOOR), isContainer(false) {
 }
 
 void Domain::SetEnv(const map<unsigned, Object>& objects, unsigned plate,
@@ -97,6 +103,34 @@ void Domain::SetEnv(const map<unsigned, Object>& objects, unsigned plate,
     _objects = objects;
     _plate = plate;
     _hold = hold;
+}
+
+void Domain::SetTask(const vector<Task>& tasks) {
+    _tasks = tasks;
+}
+
+void Domain::SetInfo(const vector<Info>& infos, const vector<ConsTask>& consTasks,
+                     const vector<ConsInfo>& consInfos) {
+    _infos = infos;
+    _consTasks = consTasks;
+    _consInfos = consInfos;
+}
+
+void Domain::Preprocess() {
+    State state;
+    for (auto i : _objects) {
+        state.pos[i.first] = i.second.loc;
+        cout << i.first << ": " << i.second.loc << endl;
+        if (i.second.isContainer) {
+            gContainers.push_back(i.first);
+            if (i.second.door == DOOR_OPENED) {
+                state.doorOpen.insert(i.first);
+                cout << "door: " << i.first << endl;
+            }
+        }
+    }
+    state.plate = _plate;
+    state.hold = _hold;
 }
 
 void Domain::GetObjects(const Object& filter, vector<unsigned>& result,

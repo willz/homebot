@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <map>
+#include <set>
+#include <cstring>
 
 const unsigned UNKNOWN_LOC = 0xffffffff;
 const unsigned UNKNOWN = 0xffffffff;
@@ -16,7 +18,7 @@ enum SortType {HUMAN, PLANT, COUCH, CHAIR, SOFA, BED, TABLE, WORKSPACE,
 
 enum SizeType {BIG, SMALL};
 
-enum DoorType {UNKNOWN_DOOR, DOOR_OPEN, DOOR_CLOSED};
+enum DoorType {UNKNOWN_DOOR, DOOR_OPENED, DOOR_CLOSED};
 
 enum InfoType {I_ON, I_NEAR, I_PLATE, I_INSIDE, I_OPENED, I_CLOSED};
 
@@ -44,9 +46,9 @@ public:
     ColorType color;
     SortType sort;
     SizeType size;
-    DoorType door;
     unsigned loc;
     unsigned inside;
+    DoorType door;
     bool isContainer;
 };
 
@@ -76,17 +78,41 @@ public:
     Info info;
 };
 
+const int MAX_OBJECT_NUM = 50;
+
+struct State {
+    State() : plate(0), hold(0) {
+        memset(pos, 0, MAX_OBJECT_NUM * sizeof(unsigned));
+    }
+    unsigned pos[MAX_OBJECT_NUM];
+    unsigned plate;
+    unsigned hold;
+    std::set<unsigned> doorOpen;
+    std::map<unsigned, unsigned> inside;
+};
+
 class Domain {
 public:
     void SetEnv(const std::map<unsigned, Object>& objects, unsigned plate,
                 unsigned hold);
+    void SetTask(const std::vector<Task>& tasks);
+    void SetInfo(const std::vector<Info>& infos, const std::vector<ConsTask>& consTasks,
+                 const std::vector<ConsInfo>& consInfos);
     void GetObjects(const Object& filter, std::vector<unsigned>& result,
                     bool requireLoc) const;
+    void Preprocess();
 
 private:
     std::map<unsigned, Object> _objects;
     unsigned _plate;
     unsigned _hold;
+    std::vector<Task> _tasks;
+    std::vector<Info> _infos;
+    std::vector<ConsTask> _consTasks;
+    std::vector<ConsInfo> _consInfos;
 };
+
+extern State gInitState;
+extern std::vector<unsigned> gContainers;
 
 #endif

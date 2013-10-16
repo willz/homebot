@@ -116,6 +116,7 @@ OPEN_PAREN AT_TOK NUMBER NUMBER CLOSE_PAREN {
     if (it == objects.end()) {
         objects[$3] = Object($3);
     }
+    //cout << "parse " << $3 << " " << $4 << endl;
     objects[$3].loc = $4;
 }
 |
@@ -172,7 +173,7 @@ OPEN_PAREN OPENED_TOK NUMBER CLOSE_PAREN {
     if (it == objects.end()) {
         objects[$3] = Object($3);
     }
-    objects[$3].door = DOOR_OPEN;
+    objects[$3].door = DOOR_OPENED;
 }
 |
 OPEN_PAREN INSIDE_TOK NUMBER NUMBER CLOSE_PAREN {
@@ -472,13 +473,32 @@ DOWN_TOK TO_TOK
 
 #include "lex_env.cpp"
 
+static void clear_var() {
+    objects.clear();
+    tasks.clear();
+    infos.clear();
+    consTasks.clear();
+    consInfos.clear();
+    plate = 0;
+    hold = 0;
+}
+
 void parse_env(const char* str, Domain& domain) {
+    clear_var();
     env_scan_string(str);
     yyparse();
     domain.SetEnv(objects, plate, hold);
 }
 
 void parse_task(const char* str, Domain& domain) {
+    clear_var();
     env_scan_string(str);
     yyparse();
+    cout << tasks.size() << endl;
+    cout << infos.size() << endl;
+    cout << consTasks.size() << endl;
+    cout << consInfos.size() << endl;
+
+    domain.SetTask(tasks);
+    //domain.SetInfo(infos, consTasks, consInfos);
 }

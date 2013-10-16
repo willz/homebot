@@ -515,11 +515,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    96,    96,    98,   102,   108,   110,   114,   122,   126,
-     130,   138,   146,   154,   162,   170,   178,   188,   195,   199,
-     205,   209,   213,   215,   219,   226,   233,   239,   246,   253,
-     259,   267,   274,   281,   291,   321,   351,   359,   369,   377,
-     388,   394,   400,   407,   414,   421
+       0,    96,    96,    98,   102,   108,   110,   114,   123,   127,
+     131,   139,   147,   155,   163,   171,   179,   189,   196,   200,
+     206,   210,   214,   216,   220,   227,   234,   240,   247,   254,
+     260,   268,   275,   282,   292,   322,   352,   360,   370,   378,
+     389,   395,   401,   408,   415,   422
 };
 #endif
 
@@ -1536,6 +1536,7 @@ yyreduce:
     if (it == objects.end()) {
         objects[(yyvsp[(3) - (5)].number)] = Object((yyvsp[(3) - (5)].number));
     }
+    //cout << "parse " << $3 << " " << $4 << endl;
     objects[(yyvsp[(3) - (5)].number)].loc = (yyvsp[(4) - (5)].number);
 }
     break;
@@ -1543,7 +1544,7 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 122 "env.y"
+#line 123 "env.y"
     {
     plate = (yyvsp[(3) - (4)].number);
 }
@@ -1552,7 +1553,7 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 126 "env.y"
+#line 127 "env.y"
     {
     hold = (yyvsp[(3) - (4)].number);
 }
@@ -1561,7 +1562,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 130 "env.y"
+#line 131 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1574,7 +1575,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 138 "env.y"
+#line 139 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1587,7 +1588,7 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 146 "env.y"
+#line 147 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1600,7 +1601,7 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 154 "env.y"
+#line 155 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1613,7 +1614,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 162 "env.y"
+#line 163 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (4)].number));
     if (it == objects.end()) {
@@ -1626,20 +1627,20 @@ yyreduce:
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 170 "env.y"
+#line 171 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (4)].number));
     if (it == objects.end()) {
         objects[(yyvsp[(3) - (4)].number)] = Object((yyvsp[(3) - (4)].number));
     }
-    objects[(yyvsp[(3) - (4)].number)].door = DOOR_OPEN;
+    objects[(yyvsp[(3) - (4)].number)].door = DOOR_OPENED;
 }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 178 "env.y"
+#line 179 "env.y"
     {
     map<unsigned, Object>::iterator it = objects.find((yyvsp[(3) - (5)].number));
     if (it == objects.end()) {
@@ -1652,7 +1653,7 @@ yyreduce:
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 188 "env.y"
+#line 189 "env.y"
     {
     cout << "ins_definition" << endl;
 }
@@ -1661,7 +1662,7 @@ yyreduce:
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 195 "env.y"
+#line 196 "env.y"
     {
     cout << "ins_body_star" << endl;
 }
@@ -1670,7 +1671,7 @@ yyreduce:
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 199 "env.y"
+#line 200 "env.y"
     {
     cout << "ins_body" << endl;
 }
@@ -1679,7 +1680,7 @@ yyreduce:
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 205 "env.y"
+#line 206 "env.y"
     {
     cout << "ins info" << endl;
 }
@@ -1688,7 +1689,7 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 209 "env.y"
+#line 210 "env.y"
     {
     cout << "ins task" << endl;
 }
@@ -1697,7 +1698,7 @@ yyreduce:
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 219 "env.y"
+#line 220 "env.y"
     {
     infos.push_back(*(yyvsp[(3) - (4)].pInfo));
     delete (yyvsp[(3) - (4)].pInfo);
@@ -1707,7 +1708,7 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 226 "env.y"
+#line 227 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_ON;
@@ -1719,7 +1720,7 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 233 "env.y"
+#line 234 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_PLATE;
@@ -1730,7 +1731,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 239 "env.y"
+#line 240 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_NEAR;
@@ -1742,7 +1743,7 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 246 "env.y"
+#line 247 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_INSIDE;
@@ -1754,7 +1755,7 @@ yyreduce:
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 253 "env.y"
+#line 254 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_OPENED;
@@ -1765,7 +1766,7 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 259 "env.y"
+#line 260 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_CLOSED;
@@ -1776,7 +1777,7 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 267 "env.y"
+#line 268 "env.y"
     {
     tasks.push_back(*(yyvsp[(3) - (4)].pTask));
     delete (yyvsp[(3) - (4)].pTask);
@@ -1786,7 +1787,7 @@ yyreduce:
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 274 "env.y"
+#line 275 "env.y"
     {
     cout << (yyvsp[(2) - (4)].stringVal) << endl;
     (yyval.pTaskPred) = new TaskPred();
@@ -1798,7 +1799,7 @@ yyreduce:
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 281 "env.y"
+#line 282 "env.y"
     {
     cout << (yyvsp[(2) - (5)].stringVal) << endl;
     (yyval.pTaskPred) = new TaskPred();
@@ -1811,7 +1812,7 @@ yyreduce:
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 291 "env.y"
+#line 292 "env.y"
     {
     (yyval.pTask) = new Task();
     (yyval.pTask)->type = (yyvsp[(1) - (2)].pTaskPred)->type;
@@ -1844,7 +1845,7 @@ yyreduce:
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 321 "env.y"
+#line 322 "env.y"
     {
     (yyval.pInfo) = new Info();
     (yyval.pInfo)->type = (yyvsp[(1) - (2)].pInfoPred)->type;
@@ -1877,7 +1878,7 @@ yyreduce:
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 351 "env.y"
+#line 352 "env.y"
     {
     ConsTask cons;
     cons.type = CONS_NOT;
@@ -1890,7 +1891,7 @@ yyreduce:
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 359 "env.y"
+#line 360 "env.y"
     {
     ConsInfo cons;
     cons.type = CONS_NOT;
@@ -1903,7 +1904,7 @@ yyreduce:
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 369 "env.y"
+#line 370 "env.y"
     {
     ConsTask cons;
     cons.type = CONS_NOTNOT;
@@ -1916,7 +1917,7 @@ yyreduce:
   case 39:
 
 /* Line 1806 of yacc.c  */
-#line 377 "env.y"
+#line 378 "env.y"
     {
     cout << " cons not not " << endl;
     ConsInfo cons;
@@ -1930,7 +1931,7 @@ yyreduce:
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 388 "env.y"
+#line 389 "env.y"
     {
     (yyval.pVecCondDef) = (yyvsp[(3) - (4)].pVecCondDef);
 }
@@ -1939,7 +1940,7 @@ yyreduce:
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 394 "env.y"
+#line 395 "env.y"
     {
     (yyvsp[(2) - (2)].pVecCondDef)->push_back(*(yyvsp[(1) - (2)].pCondDef));
     (yyval.pVecCondDef) = (yyvsp[(2) - (2)].pVecCondDef);
@@ -1950,7 +1951,7 @@ yyreduce:
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 400 "env.y"
+#line 401 "env.y"
     {
     (yyval.pVecCondDef) = new vector<CondDef>(1, *(yyvsp[(1) - (1)].pCondDef));
     delete (yyvsp[(1) - (1)].pCondDef);
@@ -1960,7 +1961,7 @@ yyreduce:
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 407 "env.y"
+#line 408 "env.y"
     {
     (yyval.pCondDef) = new CondDef();
     (yyval.pCondDef)->pred = "sort";
@@ -1972,7 +1973,7 @@ yyreduce:
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 414 "env.y"
+#line 415 "env.y"
     {
     (yyval.pCondDef) = new CondDef();
     (yyval.pCondDef)->pred = "color";
@@ -1984,7 +1985,7 @@ yyreduce:
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 421 "env.y"
+#line 422 "env.y"
     {
     (yyval.pCondDef) = new CondDef();
     (yyval.pCondDef)->pred = "type";
@@ -1996,7 +1997,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 2000 "parse_env.cpp"
+#line 2001 "parse_env.cpp"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2227,20 +2228,39 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 470 "env.y"
+#line 471 "env.y"
 
 
 
 #include "lex_env.cpp"
 
+static void clear_var() {
+    objects.clear();
+    tasks.clear();
+    infos.clear();
+    consTasks.clear();
+    consInfos.clear();
+    plate = 0;
+    hold = 0;
+}
+
 void parse_env(const char* str, Domain& domain) {
+    clear_var();
     env_scan_string(str);
     yyparse();
     domain.SetEnv(objects, plate, hold);
 }
 
 void parse_task(const char* str, Domain& domain) {
+    clear_var();
     env_scan_string(str);
     yyparse();
+    cout << tasks.size() << endl;
+    cout << infos.size() << endl;
+    cout << consTasks.size() << endl;
+    cout << consInfos.size() << endl;
+
+    domain.SetTask(tasks);
+    //domain.SetInfo(infos, consTasks, consInfos);
 }
 
