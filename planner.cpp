@@ -148,6 +148,9 @@ bool DFS(int g, int limit, int step, Op& preOp, int& newLimit) {
                 if (preOp.op == PUTDOWN && preOp.arg1 == i) {
                     continue;
                 }
+                if (cur_state.plate == i) {
+                    continue;
+                }
                 bool is_inside = false;
                 for (auto c : cur_state.inside) {
                     if (c.second.count(i)) {
@@ -293,7 +296,8 @@ bool DFS(int g, int limit, int step, Op& preOp, int& newLimit) {
             }
             for (auto c : gContainers) {
                 if (pos[c] == pos[0] && cur_state.doorOpen.count(c) && cur_state.inside.count(c)) {
-                    for (auto i : cur_state.inside[c]) {
+                    auto inside_objs = cur_state.inside[c];
+                    for (auto i : inside_objs) {
                         cur_state.hold = i;
                         cur_state.inside[c].erase(i);
                         ops[step].arg1 = i;
@@ -584,6 +588,7 @@ void AnalyzeInfo() {
                     if (gInitState.inside.count(bigObj) == 0) {
                         gInitState.inside.insert(make_pair(bigObj, set<unsigned>()));
                     }
+                    cout << "arg1.front() " << it->arg1.front() << endl;
                     gInitState.inside[bigObj].insert(it->arg1.front());
                     it = info.erase(it);
                 }
