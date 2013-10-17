@@ -25,7 +25,9 @@ bool DFS(int g, int limit, int step, Op& preOp, int& newLimit);
 bool IsGoalReached();
 
 void AnalyzeInfo();
-void AnalyzeTask();
+bool AnalyzeTask();
+void GetObjsWithoutPos(const std::list<unsigned>& src, std::list<unsigned>& ret);
+extern unsigned gObjToSense;
 void RefreshEnv(const std::string& str);
 
 extern Op ops[100];

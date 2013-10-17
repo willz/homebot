@@ -200,7 +200,8 @@ info_definition {
 }
 |
 task_definition {
-    cout << "ins task" << endl;
+    tasks.push_back(*$1);
+    delete $1;
 }
 |
 cons_not_definition
@@ -257,8 +258,7 @@ OPEN_PAREN CLOSED_TOK WORD CLOSE_PAREN {
 
 task_definition:
 OPEN_PAREN TASK_TOK task_combine CLOSE_PAREN {
-    tasks.push_back(*$3);
-    delete $3;
+    $$ = $3;
 }
 ;
 

@@ -6,6 +6,7 @@
 #include <set>
 #include <cstring>
 #include <list>
+#include <unordered_set>
 
 const unsigned UNKNOWN_LOC = 0xffffffff;
 const unsigned UNKNOWN = 0xffffffff;
@@ -146,5 +147,15 @@ extern std::vector<Cons> gNotC;
 extern std::vector<Cons> gNotNotC;
 extern std::vector<unsigned> gContainers;
 extern std::vector<ETask> gTasks;
+// task constrain
+extern std::vector<unsigned> gNotGoto;
+extern std::vector<ETask> gNotGive;
+extern std::vector<ETask> gNotPuton;
+extern std::vector<unsigned> gNotOpen;
+extern std::vector<unsigned> gNotClose;
+extern std::unordered_set<unsigned> gNotPutdown;
+extern std::vector<ETask> gNotPickup;
+extern std::vector<ETask> gNotPutin;
+extern std::vector<ETask> gNotTakeout;
 
 #endif

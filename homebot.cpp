@@ -24,13 +24,16 @@ void HomeBot::Plan()
     Planner planner;
     planner.SetDomain(domain);
     domain.Preprocess();
-    AnalyzeTask();
 
     ShowState();
-    //string str = AskLoc(8);
-    //cout << str << endl;
-    //RefreshEnv(str);
-    //ShowState();
+    while (!AnalyzeTask()) {
+        string str = AskLoc(gObjToSense);
+        cout << str << endl;
+        RefreshEnv(str);
+        ShowState();
+    }
+
+    cout << "start IDA_STAR" << endl;
     IDA_STAR();
 
     ApplyPlan();

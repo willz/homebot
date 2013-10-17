@@ -517,8 +517,8 @@ static const yytype_uint16 yyrline[] =
 {
        0,    96,    96,    98,   102,   106,   108,   112,   120,   124,
      128,   136,   144,   152,   160,   168,   176,   186,   191,   193,
-     197,   202,   206,   208,   212,   218,   225,   231,   238,   245,
-     251,   259,   266,   273,   283,   313,   343,   351,   361,   369,
+     197,   202,   207,   209,   213,   219,   226,   232,   239,   246,
+     252,   260,   266,   273,   283,   313,   343,   351,   361,   369,
      380,   386,   392,   399,   406,   413
 };
 #endif
@@ -1655,14 +1655,15 @@ yyreduce:
 /* Line 1806 of yacc.c  */
 #line 202 "env.y"
     {
-    cout << "ins task" << endl;
+    tasks.push_back(*(yyvsp[(1) - (1)].pTask));
+    delete (yyvsp[(1) - (1)].pTask);
 }
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 212 "env.y"
+#line 213 "env.y"
     {
     (yyval.pInfo) = (yyvsp[(3) - (4)].pInfo);
 }
@@ -1671,7 +1672,7 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 218 "env.y"
+#line 219 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_ON;
@@ -1683,7 +1684,7 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 225 "env.y"
+#line 226 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_PLATE;
@@ -1694,7 +1695,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 231 "env.y"
+#line 232 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_NEAR;
@@ -1706,7 +1707,7 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 238 "env.y"
+#line 239 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_INSIDE;
@@ -1718,7 +1719,7 @@ yyreduce:
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 245 "env.y"
+#line 246 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_OPENED;
@@ -1729,7 +1730,7 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 251 "env.y"
+#line 252 "env.y"
     {
     (yyval.pInfoPred) = new InfoPred();
     (yyval.pInfoPred)->type = I_CLOSED;
@@ -1740,10 +1741,9 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 259 "env.y"
+#line 260 "env.y"
     {
-    tasks.push_back(*(yyvsp[(3) - (4)].pTask));
-    delete (yyvsp[(3) - (4)].pTask);
+    (yyval.pTask) = (yyvsp[(3) - (4)].pTask);
 }
     break;
 

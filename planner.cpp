@@ -28,7 +28,7 @@ bool IDA_STAR() {
     big_objs.clear();
     locs.clear();
     cur_state = gInitState;
-    for (auto i : gTasks) {
+    for (const auto& i : gTasks) {
         for (auto x : i.arg1) {
             locs.insert(gInitState.pos[x]);
             if (i.type == T_PICKUP || i.type == T_PUTDOWN ||
@@ -43,7 +43,11 @@ bool IDA_STAR() {
             i.type == T_TAKEOUT) {
             for (auto x : i.arg2) {
                 locs.insert(gInitState.pos[x]);
-                big_objs.insert(x);
+                if (i.type == T_GIVE) {
+                    small_objs.insert(x);
+                } else {
+                    big_objs.insert(x);
+                }
             }
         }
     }
@@ -59,7 +63,7 @@ bool IDA_STAR() {
     cout << "hold: " << gInitState.hold << endl;
 
     cout << "inside: " << endl;
-    for (auto i : gInitState.inside) {
+    for (const auto& i : gInitState.inside) {
         cout << i.first << ": ";
         for (auto j : i.second) {
             cout << j << " ";
@@ -90,13 +94,16 @@ int CalcH() {
 bool DFS(int g, int limit, int step, Op& preOp, int& newLimit) {
     newLimit = 0x7fffffff;
     int cost = g + CalcH();
-    if (IsGoalReached()) {
-        opsnum = step;
-        return true;
-    }
+    // judge cost before call IsGoalReached,
+    // because may be the last operation violate the constrain and
+    // get much cost
     if (cost > limit) {
         newLimit = cost;
         return false;
+    }
+    if (IsGoalReached()) {
+        opsnum = step;
+        return true;
     }
     for (int op = 1; op <= 9; ++op) {
         if (preOp.op == op) {
@@ -152,7 +159,7 @@ bool DFS(int g, int limit, int step, Op& preOp, int& newLimit) {
                     continue;
                 }
                 bool is_inside = false;
-                for (auto c : cur_state.inside) {
+                for (const auto& c : cur_state.inside) {
                     if (c.second.count(i)) {
                         is_inside = true;
                         break;
@@ -183,7 +190,11 @@ bool DFS(int g, int limit, int step, Op& preOp, int& newLimit) {
             unsigned tmp = cur_state.hold;
             cur_state.hold = 0;
             ops[step].arg1 = tmp;
-            if (DFS(g + 2, limit, step + 1, ops[step], nextCost)) {
+            int cur_cost = 2;
+            if (gNotPutdown.count(tmp)) {
+                cur_cost += 10;
+            }
+            if (DFS(g + cur_cost, limit, step + 1, ops[step], nextCost)) {
                 return true;
             }
             if (nextCost < newLimit) {
@@ -323,7 +334,7 @@ bool DFS(int g, int limit, int step, Op& preOp, int& newLimit) {
 
 bool IsGoalReached() {
     auto& pos = cur_state.pos;
-    for (auto i : gTasks) {
+    for (const auto& i : gTasks) {
         bool found = false;
         if (i.type == T_GOTO) {
             // TODO: only one big object?
@@ -590,6 +601,7 @@ void AnalyzeInfo() {
                     }
                     cout << "arg1.front() " << it->arg1.front() << endl;
                     gInitState.inside[bigObj].insert(it->arg1.front());
+                    pos[it->arg1.front()] = pos[bigObj];
                     it = info.erase(it);
                 }
             }
@@ -603,31 +615,97 @@ void AnalyzeInfo() {
     }
 }
 
-void AnalyzeTask() {
+bool gStopAnalyzeTask;
+unsigned gObjToSense;  // If goal cannot reach, sense this object
+bool AnalyzeTask() {
+    gStopAnalyzeTask = false;
+    // If there is one task having no object(pos not known) to do with, 
+    // just sense
+    map<unsigned, unsigned> no_pos_objs;  // <id, count>
+    for (auto t : gTasks) {
+        // goto, close, open no need to analyze, those can be done.
+        if (t.type == T_GOTO || t.type == T_CLOSE || t.type == T_OPEN) {
+            continue;
+        }
+        list<unsigned> ret;
+        bool can_done;
+        if (t.type == T_GIVE) {
+            GetObjsWithoutPos(t.arg2, ret);
+            can_done = (t.arg2.size() == ret.size()) ? false : true;
+        } else {
+            GetObjsWithoutPos(t.arg1, ret);
+            can_done = (t.arg1.size() == ret.size()) ? false : true;
+        }
+        if (!can_done) {
+            for (auto i : ret) {
+                if (no_pos_objs.count(i) == 0) {
+                    no_pos_objs.insert(make_pair(i, 1));
+                } else {
+                    no_pos_objs[i]++;
+                }
+            }
+        }
+    }
+    if (!no_pos_objs.empty()) {
+        pair<unsigned, unsigned> max_item = *no_pos_objs.begin();
+        for (auto i : no_pos_objs) {
+            if (i.second > max_item.second) {
+                max_item = i;
+            }
+        }
+        gObjToSense = max_item.first;
+        return false;
+    }
+    // Well, now all tasks have at least one object to choose. But,
+    // the object may not choose because of some constrains, or,
+    // there is competition between two task on the same object
+    return true;
+}
 
+inline void GetObjsWithoutPos(const list<unsigned>& src, list<unsigned>& ret) {
+    for (auto i : src) {
+        if (gInitState.pos[i] == UNKNOWN_LOC) {
+            ret.push_back(i);
+        }
+    }
+}
+
+void DFSAnalyzeTask(int task_idx) {
+    if (gStopAnalyzeTask || task_idx == (int)gTasks.size()) {
+        return;
+    }
+    auto& task = gTasks[task_idx];
+    // goto, close, open no need to analyze, those can be done.
+    if (task.type == T_GIVE) {
+        
+    }
 }
 
 void RefreshEnv(const string& str) {
     Cons info;
     unsigned id1, id2;
-    if (str[1] == 'a') {
+    if (str[0] == 'a') {
         // at
-        sscanf(str.substr(3).c_str(), "%u %u", &id1, &id2);
+        sscanf(str.substr(3).c_str(), "%u,%u", &id1, &id2);
         gInitState.pos[id1] = id2;
     }
     if (str == "unknown") {
         // TODO
-    } else if (str[1] == 'o') {
+    } else if (str[0] == 'o') {
         // on
         info.type = I_ON;
-        sscanf(str.substr(3).c_str(), "%u %u", &id1, &id2);
-    } else if (str[1] == 'n') {
+        sscanf(str.substr(2).c_str(), "%u %u", &id1, &id2);
+    } else if (str[0] == 'n') {
         info.type = I_NEAR;
-        sscanf(str.substr(5).c_str(), "%u %u", &id1, &id2);
-    } else if (str[1] == 'i') {
+        sscanf(str.substr(4).c_str(), "%u %u", &id1, &id2);
+    } else if (str[0] == 'i') {
         info.type = I_INSIDE;
-        sscanf(str.substr(7).c_str(), "%u %u", &id1, &id2);
+        sscanf(str.substr(7).c_str(), "%u,%u", &id1, &id2);
+        cout << str.substr(7) << endl;
+        cout << "Get inside " << id1 << " " << id2 << endl;
     }
+    info.arg1.push_back(id1);
+    info.arg2.push_back(id2);
     gInitState.info.push_back(info);
     AnalyzeInfo();
 }

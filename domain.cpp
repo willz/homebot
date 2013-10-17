@@ -16,6 +16,17 @@ vector<Cons> gNotC;
 vector<Cons> gNotNotC;
 vector<unsigned> gContainers;
 vector<ETask> gTasks;
+// not task constrain
+std::vector<unsigned> gNotGoto;
+std::vector<ETask> gNotGive;
+std::vector<ETask> gNotPuton;
+std::vector<unsigned> gNotOpen;
+std::vector<unsigned> gNotClose;
+std::unordered_set<unsigned> gNotPutdown;
+std::vector<ETask> gNotPickup;
+std::vector<ETask> gNotPutin;
+std::vector<ETask> gNotTakeout;
+
 
 
 ColorType ColorStrToEnum(const char* str) {
@@ -126,6 +137,15 @@ void Domain::Preprocess() {
     gNotC.clear();
     gNotNotC.clear();
     gTasks.clear();
+    gNotGoto.clear();
+    gNotPickup.clear();
+    gNotPutdown.clear();
+    gNotOpen.clear();
+    gNotClose.clear();
+    gNotGive.clear();
+    gNotPuton.clear();
+    gNotPutin.clear();
+    gNotTakeout.clear();
 
     State& state = gInitState;
     state.hold = _hold;
@@ -163,7 +183,7 @@ void Domain::Preprocess() {
         state.info.push_back(cons);
     }
 
-    // get constain objects
+    // get constrain objects
     for (auto i : _consInfos) {
         Cons cons;
         cons.type = i.info.type;
@@ -207,6 +227,47 @@ void Domain::Preprocess() {
             GetObjects(i.arg2, e.arg2);
         }
         gTasks.push_back(e);
+    }
+    
+    // preprocess not task constrain
+    for (auto i : _consTasks) {
+        auto& task = i.task;
+        list<unsigned> objs;
+        GetObjects(task.arg1, objs);
+        if (task.type == T_GOTO) {
+            gNotGoto.insert(gNotGoto.end(), objs.begin(), objs.end());
+        } else if (task.type == T_GIVE) {
+            ETask e;
+            e.arg1 = objs;
+            GetObjects(task.arg2, e.arg2);
+            gNotGive.push_back(e);
+        } else if (task.type == T_PUTON) {
+            ETask e;
+            e.arg1 = objs;
+            GetObjects(task.arg2, e.arg2);
+            gNotPuton.push_back(e);
+        } else if (task.type == T_OPEN) {
+            gNotOpen.insert(gNotOpen.end(), objs.begin(), objs.end());
+        } else if (task.type == T_CLOSE) {
+            gNotClose.insert(gNotClose.end(), objs.begin(), objs.end());
+        } else if (task.type == T_PUTDOWN) {
+            gNotPutdown.insert(objs.begin(), objs.end());
+        } else if (task.type == T_PICKUP) {
+            ETask e;
+            e.arg1 = objs;
+            GetObjects(task.arg2, e.arg2);
+            gNotPickup.push_back(e);
+        } else if (task.type == T_PUTIN) {
+            ETask e;
+            e.arg1 = objs;
+            GetObjects(task.arg2, e.arg2);
+            gNotPutin.push_back(e);
+        } else if (task.type == T_TAKEOUT) {
+            ETask e;
+            e.arg1 = objs;
+            GetObjects(task.arg2, e.arg2);
+            gNotTakeout.push_back(e);
+        }
     }
 }
 
